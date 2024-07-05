@@ -291,11 +291,44 @@ app.get('/blob', async (req, res) => {
   // };
   })
 
-  app.get('/preview/:blobName', async (req, res) => {
-    const blobName = req.params.blobName;
+//   app.get('/preview/:blobName', async (req, res) => {
+//     const blobName = req.params.blobName;
 
-    try {
-        const containerClient = blobServiceClient.getContainerClient(containerName1);
+//     try {
+//         const containerClient = blobServiceClient.getContainerClient(containerName1);
+//         const blobClient = containerClient.getBlobClient(blobName);
+//         const downloadBlockBlobResponse = await blobClient.download(0);
+        
+//         // Set appropriate content type for previewing
+//         const contentType = downloadBlockBlobResponse.contentType;
+//         // console.log(contentType,"-----------------------------------------------------------");
+//         res.setHeader('Content-Type', contentType);
+
+//         // Pipe the blob content to the response
+//         downloadBlockBlobResponse.readableStreamBody.pipe(res);
+//     } catch (error) {
+//         console.error('Error downloading blob:', error.message);
+//         res.status(500).send('Error retrieving blob');
+//     }
+// });
+
+ app.get('/preview/:blobName', async (req, res) => {
+    const account_Key =req.headers['accesskey'];
+    const blobName = req.params.blobName;   
+
+    // console.log(account_Key,"ppppppppppp");   
+    
+    try {      
+      // console.log(blobServiceClient0,"huuuuuuuuuuuuuuuuuuuuuuuu");
+      if(!account_Key){
+        res.status(400).json({
+          Status : "Invalid AZURE STORAGE CONNECTION STRING"
+        })
+      }else{
+        const credentials1 = new StorageSharedKeyCredential(accountName, account_Key);
+
+    const blobServiceClient0 = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, credentials1);
+        const containerClient = blobServiceClient0.getContainerClient(containerName1);
         const blobClient = containerClient.getBlobClient(blobName);
         const downloadBlockBlobResponse = await blobClient.download(0);
         
@@ -306,13 +339,12 @@ app.get('/blob', async (req, res) => {
 
         // Pipe the blob content to the response
         downloadBlockBlobResponse.readableStreamBody.pipe(res);
+      }
     } catch (error) {
         console.error('Error downloading blob:', error.message);
         res.status(500).send('Error retrieving blob');
     }
 });
-
-
 
 
 // const url = 'https://login.salesforce.com/services/oauth2/token';
